@@ -8,28 +8,35 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // 1. Tabel Users
+        // 1. Tabel Roles
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique(); // admin, merchant, wali_santri
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+
+        // 2. Tabel Users (Menghapus NIS, menambahkan role_id)
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
             $table->string('name');
             $table->string('username')->unique()->nullable();
-            $table->string('nis')->unique()->nullable();
-            $table->string('email')->unique()->nullable();
+            $table->string('email')->unique();
             $table->string('password');
             $table->string('pin')->nullable();
-            $table->enum('role', ['admin', 'santri', 'merchant'])->default('santri');
             $table->rememberToken();
             $table->timestamps();
         });
 
-        // 2. Tabel Password Resets
+        // 3. Tabel Password Resets
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
-        // 3. Tabel Sessions
+        // 4. Tabel Sessions
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
@@ -43,6 +50,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('roles'); // Drop roles setelah users karena ada foreign key
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }

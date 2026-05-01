@@ -4,37 +4,64 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    // --- 1. REGISTER ---
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'role_id' => 'required|exists:roles,id', // Harus ada di tabel roles
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => $request->role_id,
+        ]);
+
+        // Load relasi role agar detail role ikut terkirim di response
+        $user->load('role');
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Registrasi berhasil',
+            'data' => [
+                'user' => $user,
+                'access_token' => $token,
+                'token_type' => 'Bearer'
+            ]
+        ], 201);
+    }
+
+    // --- 2. LOGIN ---
     public function login(Request $request)
     {
         $request->validate([
-            'login_id' => 'required|string', 
+            'login_id' => 'required|string', // Bisa email atau username
             'password' => 'required|string',
         ]);
 
-        $login_id = $request->login_id;
-
-        $user = User::where(function ($query) use ($login_id) {
-            // Kriteria 1: Santri login WAJIB pakai NIS
-            $query->where('role', 'santri')
-                  ->where('nis', $login_id);
-        })->orWhere(function ($query) use ($login_id) {
-            // Kriteria 2: Admin & Merchant login WAJIB pakai Username atau Email
-            $query->whereIn('role', ['admin', 'merchant'])
-                  ->where(function ($q) use ($login_id) {
-                      $q->where('username', $login_id)
-                        ->orWhere('email', $login_id);
-                  });
-        })->first();
+        // Cari berdasarkan Email atau Username
+        $user = User::with('role') // Langsung ambil data rolenya
+                    ->where('email', $request->login_id)
+                    ->orWhere('username', $request->login_id)
+                    ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Kredensial tidak valid. Santri gunakan NIS, Admin/Kantin gunakan Username atau Email.'
+                'message' => 'Kredensial tidak valid. Cek Email/Username dan Password Anda.'
             ], 401);
         }
 
@@ -51,6 +78,55 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function update(Request $request)
+    {
+        // 1. Ambil HANYA user yang sedang login saat ini (Berdasarkan Token Bearer)
+        $user = $request->user(); 
+
+        // 2. Validasi input (termasuk PIN)
+        $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'username' => 'sometimes|required|string|max:255|unique:users,username,' . $user->id,
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+            'pin' => 'sometimes|required|string|min:6', // Validasi PIN minimal 6 karakter
+        ]);
+
+        // 3. Ambil data dasar yang ingin diupdate
+        $dataToUpdate = $request->only(['name', 'username', 'email']);
+
+        // 4. Jika user mengirimkan data PIN baru, kita HASH terlebih dahulu, lalu masukkan ke array update
+        if ($request->has('pin')) {
+            $dataToUpdate['pin'] = Hash::make($request->pin);
+        }
+
+        // 5. Lakukan update HANYA pada user ini saja
+        $user->update($dataToUpdate);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Profil berhasil diperbarui',
+            'data' => $user->load('role')
+        ], 200);
+    }
+
+    // --- 5. HAPUS AKUN (DELETE) ---
+    public function destroy(Request $request)
+    {
+        $user = $request->user(); // Ambil data user yang sedang login saat ini
+
+        // (Opsional tapi disarankan) Hapus semua token yang dimiliki user ini agar benar-benar ter-logout dari semua perangkat
+        $user->tokens()->delete();
+
+        // Hapus data user dari database
+        $user->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Akun berhasil dihapus permanen'
+        ], 200);
+    }
+
+    // --- 4. LOGOUT ---
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

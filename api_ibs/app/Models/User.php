@@ -14,11 +14,10 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'username',
-        'nis',
         'email',
         'password',
         'pin',
-        'role',
+        'role_id', // Menambahkan role_id
     ];
 
     protected $hidden = [
@@ -32,5 +31,11 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
         ];
+    }
+
+    // Relasi: User memiliki satu Role
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
     }
 }
