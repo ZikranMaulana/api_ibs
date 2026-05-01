@@ -3,10 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CabangController;
 
 // --- Rute Publik (Tidak butuh Token) ---
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::apiResource('cabangs', CabangController::class);
 
 // --- Rute Dilindungi (Wajib Token) ---
 Route::middleware('auth:sanctum')->group(function () {
