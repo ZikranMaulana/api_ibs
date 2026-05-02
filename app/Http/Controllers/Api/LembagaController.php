@@ -10,9 +10,18 @@ class LembagaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $lembaga = \App\Models\Lembaga::all();
+        if ($request->has('trashed')) {
+            $lembaga = \App\Models\Lembaga::with('deleter')->where('status', 3)->get();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'List Data Lembaga Terhapus (Trash)',
+                'data' => $lembaga
+            ]);
+        }
+
+        $lembaga = \App\Models\Lembaga::where('status', '!=', 3)->get();
         
         return response()->json([
             'status' => 'success',
@@ -33,11 +42,15 @@ class LembagaController extends Controller
             'email' => 'nullable|email|max:255|unique:lembagas,email',
         ]);
 
-        $lembaga = \App\Models\Lembaga::create($request->all());
+        $data = $request->all();
+        $data['status'] = 1;
+        $data['created_by'] = auth()->id();
+        $lembaga = \App\Models\Lembaga::create($data);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Data lembaga berhasil disimpan',
+            'log'     => 'Berhasil melakukan penambahan data lembaga (Status 1)',
             'data' => $lembaga
         ], 201);
     }
@@ -47,7 +60,7 @@ class LembagaController extends Controller
      */
     public function show(string $id)
     {
-        $lembaga = \App\Models\Lembaga::find($id);
+        $lembaga = \App\Models\Lembaga::where('id', $id)->where('status', '!=', 3)->first();
 
         if (!$lembaga) {
             return response()->json([
@@ -67,7 +80,7 @@ class LembagaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $lembaga = \App\Models\Lembaga::find($id);
+        $lembaga = \App\Models\Lembaga::where('id', $id)->where('status', '!=', 3)->first();
 
         if (!$lembaga) {
             return response()->json([
@@ -84,11 +97,15 @@ class LembagaController extends Controller
             'email' => 'nullable|email|max:255|unique:lembagas,email,' . $id,
         ]);
 
-        $lembaga->update($request->all());
+        $data = $request->all();
+        $data['status'] = 2;
+        $data['updated_by'] = auth()->id();
+        $lembaga->update($data);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Data lembaga berhasil diupdate',
+            'log'     => 'Berhasil melakukan pengeditan data lembaga (Status 2)',
             'data' => $lembaga
         ]);
     }
@@ -98,13 +115,17 @@ class LembagaController extends Controller
      */
     public function destroy(string $id)
     {
-        $lembaga = \App\Models\Lembaga::find($id);
+        $lembaga = \App\Models\Lembaga::where('id', $id)->where('status', '!=', 3)->first();
         
         if ($lembaga) {
-            $lembaga->delete();
+            $lembaga->update([
+                'status' => 3,
+                'deleted_by' => auth()->id(),
+            ]);
             return response()->json([
                 'status' => 'success',
-                'message' => 'Data lembaga berhasil dihapus'
+                'message' => 'Data lembaga berhasil dihapus',
+                'log'     => 'Berhasil melakukan penghapusan data lembaga (Status 3 - Soft Delete)',
             ]);
         }
 

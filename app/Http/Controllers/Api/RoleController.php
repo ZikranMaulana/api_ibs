@@ -11,9 +11,18 @@ class RoleController extends Controller
     /**
      * Tampilkan semua data Role
      */
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::all();
+        if ($request->has('trashed')) {
+            $roles = Role::with('deleter')->where('status', 3)->get();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'List Data Role Terhapus (Trash)',
+                'data' => $roles
+            ], 200);
+        }
+
+        $roles = Role::where('status', '!=', 3)->get();
         return response()->json([
             'status' => 'success',
             'message' => 'List Data Role',
@@ -32,11 +41,15 @@ class RoleController extends Controller
             'description' => 'nullable|string'
         ]);
 
-        $role = Role::create($request->all());
+        $data = $request->all();
+        $data['status'] = 1;
+        $data['created_by'] = auth()->id();
+        $role = Role::create($data);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Role berhasil ditambahkan',
+            'log'     => 'Berhasil melakukan penambahan data role (Status 1)',
             'data' => $role
         ], 201);
     }
@@ -46,8 +59,10 @@ class RoleController extends Controller
      */
     public function show($id_or_kode)
     {
-        // Cari berdasarkan ID atau KODE
-        $role = Role::where('id', $id_or_kode)->orWhere('kode', $id_or_kode)->first();
+        // Cari berdasarkan ID atau KODE yang belum dihapus
+        $role = Role::where(function($query) use ($id_or_kode) {
+            $query->where('id', $id_or_kode)->orWhere('kode', $id_or_kode);
+        })->where('status', '!=', 3)->first();
 
         if (!$role) {
             return response()->json(['status' => 'error', 'message' => 'Role tidak ditemukan'], 404);
@@ -65,7 +80,9 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id_or_kode)
     {
-        $role = Role::where('id', $id_or_kode)->orWhere('kode', $id_or_kode)->first();
+        $role = Role::where(function($query) use ($id_or_kode) {
+            $query->where('id', $id_or_kode)->orWhere('kode', $id_or_kode);
+        })->where('status', '!=', 3)->first();
 
         if (!$role) {
             return response()->json(['status' => 'error', 'message' => 'Role tidak ditemukan'], 404);
@@ -77,11 +94,15 @@ class RoleController extends Controller
             'description' => 'nullable|string'
         ]);
 
-        $role->update($request->all());
+        $data = $request->all();
+        $data['status'] = 2;
+        $data['updated_by'] = auth()->id();
+        $role->update($data);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Role berhasil diupdate',
+            'log'     => 'Berhasil melakukan pengeditan data role (Status 2)',
             'data' => $role
         ], 200);
     }
@@ -91,17 +112,23 @@ class RoleController extends Controller
      */
     public function destroy($id_or_kode)
     {
-        $role = Role::where('id', $id_or_kode)->orWhere('kode', $id_or_kode)->first();
+        $role = Role::where(function($query) use ($id_or_kode) {
+            $query->where('id', $id_or_kode)->orWhere('kode', $id_or_kode);
+        })->where('status', '!=', 3)->first();
 
         if (!$role) {
             return response()->json(['status' => 'error', 'message' => 'Role tidak ditemukan'], 404);
         }
 
-        $role->delete();
+        $role->update([
+            'status' => 3,
+            'deleted_by' => auth()->id(),
+        ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Role berhasil dihapus'
+            'message' => 'Role berhasil dihapus',
+            'log'     => 'Berhasil melakukan penghapusan data role (Status 3 - Soft Delete)',
         ], 200);
     }
 }

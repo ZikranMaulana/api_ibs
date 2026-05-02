@@ -1,0 +1,216 @@
+{
+	"info": {
+		"name": "API IBS - CRUD & Status Soft Delete",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Cabang",
+			"item": [
+				{
+					"name": "Get All Cabang",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/cabangs",
+							"host": ["{{base_url}}"],
+							"path": ["cabangs"]
+						}
+					}
+				},
+				{
+					"name": "Create Cabang (Test Double Data)",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nama_cabang\": \"Cabang Utama Jakarta\",\n    \"lokasi\": \"Jakarta Selatan\"\n}",
+							"options": {"raw": {"language": "json"}}
+						},
+						"url": {
+							"raw": "{{base_url}}/cabangs",
+							"host": ["{{base_url}}"],
+							"path": ["cabangs"]
+						}
+					}
+				},
+				{
+					"name": "Edit Cabang",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nama_cabang\": \"Cabang Utama Jakarta Update\",\n    \"lokasi\": \"Jakarta Pusat\"\n}",
+							"options": {"raw": {"language": "json"}}
+						},
+						"url": {
+							"raw": "{{base_url}}/cabangs/1",
+							"host": ["{{base_url}}"],
+							"path": ["cabangs", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Cabang (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/cabangs/1",
+							"host": ["{{base_url}}"],
+							"path": ["cabangs", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Lembaga",
+			"item": [
+				{
+					"name": "Get All Lembaga",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/lembaga",
+							"host": ["{{base_url}}"],
+							"path": ["lembaga"]
+						}
+					}
+				},
+				{
+					"name": "Create Lembaga",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nama_lembaga\": \"Lembaga Pendidikan ABC\",\n    \"alamat\": \"Jl. Pendidikan No 1\",\n    \"kota\": \"Bandung\",\n    \"no_telepon\": \"08123456789\",\n    \"email\": \"info@lembagaabc.com\"\n}",
+							"options": {"raw": {"language": "json"}}
+						},
+						"url": {
+							"raw": "{{base_url}}/lembaga",
+							"host": ["{{base_url}}"],
+							"path": ["lembaga"]
+						}
+					}
+				},
+				{
+					"name": "Delete Lembaga",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/lembaga/1",
+							"host": ["{{base_url}}"],
+							"path": ["lembaga", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Role",
+			"item": [
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/roles",
+							"host": ["{{base_url}}"],
+							"path": ["roles"]
+						}
+					}
+				},
+				{
+					"name": "Create Role",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"kode\": \"ADM003\",\n    \"name\": \"Admin Keuangan\",\n    \"description\": \"Mengurus keuangan\"\n}",
+							"options": {"raw": {"language": "json"}}
+						},
+						"url": {
+							"raw": "{{base_url}}/roles",
+							"host": ["{{base_url}}"],
+							"path": ["roles"]
+						}
+					}
+				},
+				{
+					"name": "Delete Role",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/roles/1",
+							"host": ["{{base_url}}"],
+							"path": ["roles", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Users",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": ["{{base_url}}"],
+							"path": ["users"]
+						}
+					}
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"username\": \"johndoe\",\n    \"email\": \"johndoe@example.com\",\n    \"password\": \"password123\",\n    \"role_id\": 1\n}",
+							"options": {"raw": {"language": "json"}}
+						},
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": ["{{base_url}}"],
+							"path": ["users"]
+						}
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/users/1",
+							"host": ["{{base_url}}"],
+							"path": ["users", "1"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://api_ibs.test/api",
+			"type": "string"
+		}
+	]
+}

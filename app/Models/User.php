@@ -18,6 +18,10 @@ class User extends Authenticatable
         'password',
         'pin',
         'role_id', // Menambahkan role_id
+        'status',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     protected $hidden = [
@@ -37,5 +41,17 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function creator() {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater() {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deleter() {
+        return $this->belongsTo(User::class, 'deleted_by');
     }
 }
