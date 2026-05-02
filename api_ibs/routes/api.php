@@ -4,13 +4,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CabangController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\LembagaController;
 
 // --- Rute Publik (Tidak butuh Token) ---
 Route::post('/register', [AuthController::class, 'register']);
-use App\Http\Controllers\Api\LembagaController;
 // Route Public (Tidak memerlukan token, bisa diakses langsung)
 Route::post('/login', [AuthController::class, 'login']);
-Route::apiResource('cabangs', CabangController::class);
 
 // --- Rute Dilindungi (Wajib Token) ---
 Route::middleware('auth:sanctum')->group(function () {
@@ -21,6 +22,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Cek Data User + Relasi Role-nya
     // CRUD Lembaga Routes
     Route::apiResource('lembaga', LembagaController::class);
+    Route::apiResource('cabangs', CabangController::class);
+    Route::apiResource('users', UserController::class);
+    Route::apiResource('roles', RoleController::class);
+    Route::apiResource('roles', RoleController::class);
     
     // Endpoint ini sangat penting untuk React:
     // Digunakan saat aplikasi React pertama kali load untuk mengecek siapa yang sedang login

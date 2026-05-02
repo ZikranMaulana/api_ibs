@@ -11,7 +11,8 @@ return new class extends Migration
         // 1. Tabel Roles
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); // admin, merchant, wali_santri
+            $table->string('kode', 10)->unique(); // Tambahkan baris ini (Maksimal 10 karakter)
+            $table->string('name')->unique();
             $table->string('description')->nullable();
             $table->timestamps();
         });

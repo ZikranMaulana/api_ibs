@@ -12,16 +12,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Buat Data Roles
-        $roleAdmin = Role::create(['name' => 'admin', 'description' => 'Administrator Sistem']);
-        $roleMerchant = Role::create(['name' => 'merchant', 'description' => 'Kantin atau Merchant']);
-        $roleWali = Role::create(['name' => 'wali_santri', 'description' => 'Wali Santri / Orang Tua']);
+        $roleAdmin = Role::create(['kode' => 'ADM001', 'name' => 'Superadmin', 'description' => 'Superadmin Sistem']);
+        $roleMerchant = Role::create(['kode' => 'KNT001', 'name' => 'Admin Kantin', 'description' => 'Admin Kantin atau Merchant']);
+        $roleWali = Role::create(['kode' => 'WLI001', 'name' => 'Wali Santri', 'description' => 'Wali Santri / Orang Tua']);
 
         // 2. Buat Akun Admin
         User::create([
-            'name' => 'Administrator',
-            'username' => 'admin',
-            'email' => 'admin@ywir.com',
-            'password' => Hash::make('admin123'),
+            'name' => 'Super Admin',
+            'username' => 'superadmin',
+            'email' => 'superadmin@ywir.com',
+            'password' => Hash::make('superadmin123'),
             'role_id' => $roleAdmin->id,
         ]);
 
@@ -37,9 +37,9 @@ class DatabaseSeeder extends Seeder
 
         // 4. Buat Akun Merchant/Kantin
         User::create([
-            'name' => 'Kantin',
-            'username' => 'kantin',
-            'email' => 'kantin@ywir.com',
+            'name' => 'Admin Kantin',
+            'username' => 'admin_kantin',
+            'email' => 'adminkantin@ywir.com',
             'password' => Hash::make('kantin123'),
             'role_id' => $roleMerchant->id,
         ]);

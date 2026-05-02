@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
 {
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['kode', 'name', 'description'];
 
     // Relasi: Satu Role dimiliki oleh banyak User
     public function users()
