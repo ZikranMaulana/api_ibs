@@ -30,13 +30,17 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode' => 'required|string|max:10|unique:roles',
-            'name' => 'required|string|unique:roles',
-            'description' => 'nullable|string'
+            'kode' => 'required|string|max:10|unique:roles,kode',
+            'name' => 'required|string|unique:roles,name',
+            'description' => 'nullable|string',
+            'is_active' => 'nullable|boolean'
         ]);
 
         $data = $request->all();
         $data['status'] = 1;
+        if (!isset($data['is_active'])) {
+            $data['is_active'] = 1; // Default aktif
+        }
         $data['created_by'] = auth()->id();
         $role = Role::create($data);
 
@@ -78,7 +82,8 @@ class RoleController extends Controller
         $request->validate([
             'kode' => 'sometimes|required|string|max:10|unique:roles,kode,' . $role->id,
             'name' => 'sometimes|required|string|unique:roles,name,' . $role->id,
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
+            'is_active' => 'nullable|boolean'
         ]);
 
         $data = $request->all();
@@ -94,9 +99,6 @@ class RoleController extends Controller
         ], 200);
     }
 
-    /**
-     * Aktif / Non-aktifkan Role
-     */
     public function toggleStatus($id_or_kode)
     {
         $role = Role::where(function($query) use ($id_or_kode) {
@@ -107,18 +109,20 @@ class RoleController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Role tidak ditemukan'], 404);
         }
 
-        if ($role->status == 1 || $role->status == 2) {
+        if ($role->is_active == 1) {
             $role->update([
-                'status' => 0,
+                'is_active' => 0,
+                'status' => 2, // Catat sebagai editan
                 'updated_by' => auth()->id()
             ]);
-            $msg = 'Role berhasil dinonaktifkan (Status 0)';
+            $msg = 'Role berhasil dinonaktifkan (Tidak Aktif)';
         } else {
             $role->update([
-                'status' => 1,
+                'is_active' => 1,
+                'status' => 2, // Catat sebagai editan
                 'updated_by' => auth()->id()
             ]);
-            $msg = 'Role berhasil diaktifkan kembali (Status 1)';
+            $msg = 'Role berhasil diaktifkan kembali (Aktif)';
         }
 
         return response()->json([
