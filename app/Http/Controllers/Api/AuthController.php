@@ -10,52 +10,41 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // --- 1. REGISTER ---
     public function register(Request $request)
     {
-        // 1. Validasi Input (Lengkap dengan Pesan Custom Bahasa Indonesia)
         $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6',
-            'role_id' => 'required', // Hapus 'exists' karena kita akan cek manual (bisa ID atau Kode)
-        ], [
-            // ALERT: Jika data sudah ada (Unique)
-            'username.unique' => 'Username ini sudah digunakan. Silakan pilih username lain.',
-            'email.unique' => 'Akun dengan email ini sudah terdaftar. Silakan gunakan email lain atau langsung Login.',
-            
-            // ALERT: Validasi lainnya
-            'password.min' => 'Password minimal harus 6 karakter.',
-            'role_id.required' => 'Role wajib diisi (bisa menggunakan ID Angka atau Kode Teks yang tersedia).'
+            'role_id' => 'required',
+            'cabang_id' => 'nullable|exists:cabangs,id' // Tambahkan ini
         ]);
 
-        // 2. Cek Cerdas Role (Berdasarkan ID atau Kode)
         $role = Role::where('id', $request->role_id)->orWhere('kode', $request->role_id)->first();
 
-        // Jika role yang diketik tidak ada di database, lemparkan error seperti bawaan Laravel
         if (!$role) {
-            return response()->json([
-                'message' => 'Role tidak valid atau tidak ditemukan.',
-                'errors' => [
-                    'role_id' => [
-                        'Role yang Anda masukkan tidak terdaftar di sistem.'
-                    ]
-                ]
-            ], 422); // 422 Unprocessable Content (Standar error validasi)
+            return response()->json(['message' => 'Role tidak ditemukan.'], 422);
         }
 
-        // 3. Buat User (Gunakan ID asli dari objek $role yang berhasil ditemukan di langkah 2)
+        // VALIDASI CABANG: Tolak jika mencoba buat akun non-superadmin tapi cabang kosong
+        if ($role->kode !== 'ADM001' && empty($request->cabang_id)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cabang tidak boleh kosong. Pendaftaran role ini mewajibkan pemilihan Cabang.'
+            ], 422);
+        }
+
         $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => $role->id, // Selalu simpan ID angka ke dalam tabel users
+            'role_id' => $role->id,
+            'cabang_id' => $role->kode === 'ADM001' ? null : $request->cabang_id, // Superadmin = null
         ]);
 
-        // 4. Load relasi role agar detail role ikut terkirim di response
-        $user->load('role');
+        $user->load('role', 'cabang');
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
