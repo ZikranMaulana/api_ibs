@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 
 class RoleController extends Controller
 {
-    /**
-     * Tampilkan semua data Role
-     */
     public function index(Request $request)
     {
         if ($request->has('trashed')) {
@@ -30,9 +27,6 @@ class RoleController extends Controller
         ], 200);
     }
 
-    /**
-     * Tambah Role Baru
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -54,12 +48,8 @@ class RoleController extends Controller
         ], 201);
     }
 
-    /**
-     * Tampilkan Satu Role (Berdasarkan ID atau Kode)
-     */
     public function show($id_or_kode)
     {
-        // Cari berdasarkan ID atau KODE yang belum dihapus
         $role = Role::where(function($query) use ($id_or_kode) {
             $query->where('id', $id_or_kode)->orWhere('kode', $id_or_kode);
         })->where('status', '!=', 3)->first();
@@ -75,9 +65,6 @@ class RoleController extends Controller
         ], 200);
     }
 
-    /**
-     * Update Role (Berdasarkan ID atau Kode)
-     */
     public function update(Request $request, $id_or_kode)
     {
         $role = Role::where(function($query) use ($id_or_kode) {
@@ -108,8 +95,39 @@ class RoleController extends Controller
     }
 
     /**
-     * Hapus Role (Berdasarkan ID atau Kode)
+     * Aktif / Non-aktifkan Role
      */
+    public function toggleStatus($id_or_kode)
+    {
+        $role = Role::where(function($query) use ($id_or_kode) {
+            $query->where('id', $id_or_kode)->orWhere('kode', $id_or_kode);
+        })->where('status', '!=', 3)->first();
+
+        if (!$role) {
+            return response()->json(['status' => 'error', 'message' => 'Role tidak ditemukan'], 404);
+        }
+
+        if ($role->status == 1 || $role->status == 2) {
+            $role->update([
+                'status' => 0,
+                'updated_by' => auth()->id()
+            ]);
+            $msg = 'Role berhasil dinonaktifkan (Status 0)';
+        } else {
+            $role->update([
+                'status' => 1,
+                'updated_by' => auth()->id()
+            ]);
+            $msg = 'Role berhasil diaktifkan kembali (Status 1)';
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $msg,
+            'data' => $role
+        ], 200);
+    }
+
     public function destroy($id_or_kode)
     {
         $role = Role::where(function($query) use ($id_or_kode) {

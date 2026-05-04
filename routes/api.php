@@ -25,7 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('lembaga', LembagaController::class);
     Route::apiResource('cabangs', CabangController::class);
     Route::apiResource('users', UserController::class);
-    Route::apiResource('roles', RoleController::class);
+    Route::put('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus']);
     Route::apiResource('roles', RoleController::class);
     Route::apiResource('menus', MenuController::class);
     

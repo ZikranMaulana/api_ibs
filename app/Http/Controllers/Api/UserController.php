@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    /**
-     * Menampilkan semua data pengguna
-     */
     public function index(Request $request)
     {
         // 1. Ambil user yang sedang login
@@ -100,9 +97,6 @@ class UserController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $user = User::with('role')->where('id', $id)->where('status', '!=', 3)->first();
@@ -117,9 +111,6 @@ class UserController extends Controller
         ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         // 1. Cari target user yang ingin diupdate
@@ -201,9 +192,6 @@ class UserController extends Controller
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $user = User::where('id', $id)->where('status', '!=', 3)->first();

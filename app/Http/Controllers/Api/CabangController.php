@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 
 class CabangController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         if ($request->has('trashed')) {
@@ -30,9 +27,6 @@ class CabangController extends Controller
         ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -55,9 +49,6 @@ class CabangController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $cabang = Cabang::where('id', $id)->where('status', '!=', 3)->first();
@@ -76,9 +67,6 @@ class CabangController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -110,9 +98,6 @@ class CabangController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         $cabang = Cabang::where('id', $id)->where('status', '!=', 3)->first();
