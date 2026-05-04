@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CabangController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\LembagaController;
+use App\Http\Controllers\Api\MenuController;
 
 // --- Rute Publik (Tidak butuh Token) ---
 Route::post('/register', [AuthController::class, 'register']);
@@ -26,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::apiResource('roles', RoleController::class);
     Route::apiResource('roles', RoleController::class);
+    Route::apiResource('menus', MenuController::class);
     
     // Endpoint ini sangat penting untuk React:
     // Digunakan saat aplikasi React pertama kali load untuk mengecek siapa yang sedang login

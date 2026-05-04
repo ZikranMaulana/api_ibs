@@ -25,4 +25,9 @@ class Role extends Model
     public function deleter() {
         return $this->belongsTo(User::class, 'deleted_by');
     }
+    // Relasi Many-to-Many ke Menu
+    public function menus()
+    {
+        return $this->belongsToMany(Menu::class, 'menu_role');
+    }
 }
